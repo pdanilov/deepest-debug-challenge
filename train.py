@@ -1,13 +1,14 @@
-from __future__ import print_function
+import sys
+
+import numpy as np
 import torch
-from torchvision import transforms
-import dataloader
-import model
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
-import torch.nn.functional as F
-import sys
-import numpy as np
+from torchvision import transforms
+
+import dataloader
+import model
 
 # WARNING: this code is full of (ML-logical) bugs. can you squash them all?
 # we've created a super-awesome AI that recognizes digits!
@@ -18,7 +19,6 @@ import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-
 ##############################  Data Loading & Augmentation   ##############################
 
 # we use MNIST dataset, which contains images of hand-written digits
@@ -27,14 +27,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # heard that we can enlarge the dataset by augmenting the images
 # thankfully, torchvision has built-in method with compose API
-transformer = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.25),
-    transforms.RandomRotation(degrees=90),
-    transforms.RandomResizedCrop(size=28, scale=(0.2, 2.0)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.ToTensor()])
+transformer = transforms.Compose(
+    [
+        transforms.ToPILImage(),
+        transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.25),
+        transforms.RandomRotation(degrees=90),
+        transforms.RandomResizedCrop(size=28, scale=(0.2, 2.0)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
+        transforms.ToTensor(),
+    ]
+)
 
 
 # pytorch DataLoader can additionally use collate_fn for post-processing the loaded data
@@ -67,7 +70,6 @@ mnist_test = torch.utils.data.DataLoader(dataset_test, batch_size=10000, collate
 ##########################################################################################
 
 
-
 ##############################  Neural Networks Definition & Training  ##############################
 
 # we define the AI using a neural network
@@ -79,7 +81,7 @@ neural_net = model.FeedForwardNet(num_layers=10).to(device)
 optimizer = optim.Adam(neural_net.parameters(), lr=1)
 
 # now we defined all the necessary things, let's train the AI
-print('\n' + 'training phase')
+print("\n" + "training phase")
 for batch_idx, (input_data, target_data) in enumerate(mnist_train):
     # pytorch needs to "zero-fill" gradients for each train step
     # otherwise, the model adds up the gradients: not what you would expect
@@ -110,10 +112,10 @@ for batch_idx, (input_data, target_data) in enumerate(mnist_train):
 
     # print the train log every steps
     if batch_idx % 1 == 0:
-        train_log = 'Loss: {:.6f}\tTrain: [{}/{} ({:.0f}%)]'.format(
-            loss.item(), batch_idx * len(input_data), len(mnist_train.dataset),
-                          100. * batch_idx / len(mnist_train))
-        print(train_log, end='\r')
+        train_log = "Loss: {:.6f}\tTrain: [{}/{} ({:.0f}%)]".format(
+            loss.item(), batch_idx * len(input_data), len(mnist_train.dataset), 100.0 * batch_idx / len(mnist_train)
+        )
+        print(train_log, end="\r")
         sys.stdout.flush()
 
 ##########################################################################################
@@ -122,8 +124,8 @@ for batch_idx, (input_data, target_data) in enumerate(mnist_train):
 ##############################  Evaluation of the Trained Neural Networks   ##############################
 
 # let's test the trained AI: feed the test data and get the test accuracy
-correct = 0.
-test_loss = 0.
+correct = 0.0
+test_loss = 0.0
 
 # pytorch uses no_grad() context manager for evaluation phase: it does not store the history & grads
 # so it's much faster and memory-efficient
@@ -148,11 +150,11 @@ with torch.no_grad():
 
 # average out the test results
 test_loss /= len(mnist_test.dataset)
-accuracy = 100. * correct / len(mnist_test.dataset)
+accuracy = 100.0 * correct / len(mnist_test.dataset)
 
 # print the test result
-print('\n')
-print('end of training ' + '\ttest loss: ' + str(test_loss.item()) + ' accuracy: ' + str(accuracy.item()) + '%')
+print("\n")
+print("end of training " + "\ttest loss: " + str(test_loss.item()) + " accuracy: " + str(accuracy.item()) + "%")
 
 # the model sucked: 10% accuracy means that the model is no better than just randomly picking the label
 # that 4th industrial revolution thingy is bs, time to learn blockchain

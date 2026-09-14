@@ -1,6 +1,5 @@
-import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 # WARNING: this code is full of (ML-logical) bugs. can you squash them all?
 
@@ -29,7 +28,6 @@ class FeedForwardNet(nn.Module):
             self.fc_layers[i].bias.data.fill_(0)
         self.fc_last.weight.data.fill_(0)
         self.fc_last.bias.data.fill_(0)
-
 
     def forward(self, x):
         # defines forward pass of the model
